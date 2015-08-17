@@ -28,6 +28,18 @@ import org.slf4j.LoggerFactory;
  * selected block size for hashing, it is possible to effectively compute the
  * file hash in a streaming fashion.
  * 
+ * After construction, the merkle tree created is effectively immutable.
+ * 
+ * There are many ways to diff two trees. One option that this code supports is
+ * the iterative option:<br>
+ * 1. request hashes of a level starting with root via
+ * {@link #getHashesAtLevel(int)}<br>
+ * 2. compare hashes returned with hashes of the local tree's corresponding
+ * level via {@link #compareHashesAtLevel(int, List)}<br>
+ * 3. if there's a diff in any of the nodes, request that nodes children via
+ * {@link #getChildrenHashesOfHash(int, byte[])}<br>
+ * 4. repeat steps 1 to 3<br>
+ * 
  * @author gaurav
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -179,8 +191,10 @@ public final class MerkleTree {
      * iterating over their children at creation time and are immutable from
      * that point forward.
      * 
-     * The contract for creating the MerkleTreeNode is 2-step: 1. invoke one of
-     * the constructors. 2. invoke the bloomNode() method.
+     * The contract for creating the MerkleTreeNode is 2-step:<br>
+     * 1. invoke one of the constructors<br>
+     * 2. invoke the bloomNode() method
+     * {@link #bloomNode(HashingScheme, boolean)}<br>
      */
     public interface MerkleTreeNode<T> {
         // This function needs to be idempotent
@@ -226,7 +240,12 @@ public final class MerkleTree {
                 if (hash != null) {
                     logger.info("This MerkleTreeNode has already bloomed");
                 } else {
-                    this.hash = Hasher.computeHash(hashingScheme, children);
+                    if (alreadyHashed) {
+                        this.hash = Hasher.computeHash(hashingScheme, children);
+                    } else {
+                        throw new IllegalArgumentException(
+                                "Non already hashed source data streaming is current unsupported");
+                    }
                 }
             }
         }
@@ -277,10 +296,11 @@ public final class MerkleTree {
         // stream from the source and construct the tree
         final List<MerkleTreeNode> leaves = curateLeaves();
 
-        // build non leaf nodes
+        // build non-leaf nodes
         MerkleTreeNode root = curateNonLeaves(hashingScheme, leaves);
 
-        // flip nodes by level lists
+        // flip nodes by level lists since we started creating the tree from its
+        // leaves
         Collections.reverse(nodesByLevel);
 
         return root;
@@ -294,7 +314,7 @@ public final class MerkleTree {
         switch (source.getType()) {
         case BYTE_ARRAY:
             leaves = new ArrayList<MerkleTreeNode>();
-            Iterator<byte[]> leafHashIterator = source.stream();
+            final Iterator<byte[]> leafHashIterator = source.stream();
             while (leafHashIterator.hasNext()) {
                 final byte[] hash = leafHashIterator.next();
                 MerkleTreeNode<byte[]> leaf = new MerkleTreeByteArrayNode(hash);
@@ -323,13 +343,13 @@ public final class MerkleTree {
         switch (source.getType()) {
         case BYTE_ARRAY:
             final List<MerkleTreeNode> parentLevelNodes = new ArrayList<MerkleTreeNode>();
-            Iterator<MerkleTreeNode> nodeIter = leveledNodes.iterator();
+            final Iterator<MerkleTreeNode> nodeIter = leveledNodes.iterator();
             int nodeIterCounter = 0;
             while (nodeIter.hasNext()) {
                 final List<MerkleTreeNode> toHash = new ArrayList<MerkleTreeNode>();
                 for (int iter = 0; iter < branchingFactor.getFactor(); iter++) {
                     if (nodeIterCounter < leveledNodes.size()) {
-                        MerkleTreeNode nextNode = nodeIter.next();
+                        final MerkleTreeNode nextNode = nodeIter.next();
                         toHash.add(nextNode);
                         nodeIterCounter++;
                     }
@@ -362,10 +382,13 @@ public final class MerkleTree {
      * Source of data for the Merkle tree.
      */
     public interface MerkleTreeSource<T> {
+        // Stream input source data
         Iterator<T> stream();
 
+        // Report the type of data provided by this source
         SourceType getType();
 
+        // Report if the data is already hashed or needs further hashing
         boolean alreadyHashed();
     }
 

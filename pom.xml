@@ -36,11 +36,12 @@
       <artifactId>commons-codec</artifactId>
       <version>1.10</version>
     </dependency>
+    <!--
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
       <version>18.0</version>
-    </dependency>
+    </dependency>-->
     <!-- can bring in too much crap
     <dependency>
 	  <groupId>org.codehaus.mojo</groupId>

@@ -261,7 +261,6 @@ public class MerkleTreeTest {
 
                 childrenHashes = tree.getChildrenHashesOfHash(iter, hashes.get(4));
                 assertTrue(childrenHashes.isEmpty());
-
                 break;
             }
         }

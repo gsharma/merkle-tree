@@ -13,6 +13,7 @@ import com.github.merkletree.MerkleTree.BranchingFactor;
 import com.github.merkletree.MerkleTree.Hasher;
 import com.github.merkletree.MerkleTree.HashingScheme;
 import com.github.merkletree.MerkleTree.MerkleTreeByteArrayHashedSource;
+import com.github.merkletree.MerkleTree.MerkleTreeFileHashedSource;
 import com.github.merkletree.MerkleTree.MerkleTreeNode;
 import com.github.merkletree.MerkleTree.MerkleTreeSource;
 
@@ -196,4 +197,73 @@ public class MerkleTreeTest {
         }
     }
 
+    @Test
+    public void testSha1TwoChildFileBackedMerkleTree() throws Exception {
+        final String fileName = "src/test/resources/HipChat-3.2.1.zip";
+        final int fileSplitBytes = 2 * 1024 * 1024; // 2MB
+        MerkleTreeSource source = new MerkleTreeFileHashedSource(fileName, fileSplitBytes, HashingScheme.SHA1);
+        MerkleTree tree = new MerkleTree(HashingScheme.SHA1, BranchingFactor.TWO, source);
+        tree.printTree();
+
+        MerkleTreeNode root = tree.getRoot();
+        assertEquals("FE001D14D2F3A0081177E9C2F4FD8A6510CC1C37", Hasher.hexify(root.getHash()));
+        assertEquals(11, tree.getNodeCount());
+        assertEquals(4, tree.getDepth());
+
+        for (int iter = 0; iter < tree.getDepth(); iter++) {
+            List<byte[]> hashes = tree.getHashesAtLevel(iter);
+            switch (iter) {
+            case 0:
+                assertEquals(1, hashes.size());
+                assertEquals("FE001D14D2F3A0081177E9C2F4FD8A6510CC1C37", Hasher.hexify(hashes.get(0)));
+
+                List<byte[]> childrenHashes = tree.getChildrenHashesOfHash(iter, hashes.get(0));
+                assertEquals("BCB448E0A9C50EA19803F30A4B4E635314068B97", Hasher.hexify(childrenHashes.get(0)));
+                assertEquals("AB56AF573A74D2575318E6806543FCEC1DF80A43", Hasher.hexify(childrenHashes.get(1)));
+                break;
+            case 1:
+                assertEquals(2, hashes.size());
+                assertEquals("BCB448E0A9C50EA19803F30A4B4E635314068B97", Hasher.hexify(hashes.get(0)));
+                assertEquals("AB56AF573A74D2575318E6806543FCEC1DF80A43", Hasher.hexify(hashes.get(1)));
+
+                childrenHashes = tree.getChildrenHashesOfHash(iter, hashes.get(0));
+                assertEquals("8DB4FC983A7CC2D3177C0BC3C3AD3BB454AAB057", Hasher.hexify(childrenHashes.get(0)));
+                assertEquals("A8E6A6C5E35158CC1A73FA82B9A96A821208BBDF", Hasher.hexify(childrenHashes.get(1)));
+
+                childrenHashes = tree.getChildrenHashesOfHash(iter, hashes.get(1));
+                assertEquals("AB56AF573A74D2575318E6806543FCEC1DF80A43", Hasher.hexify(childrenHashes.get(0)));
+                break;
+            case 2:
+                assertEquals(3, hashes.size());
+                assertEquals("8DB4FC983A7CC2D3177C0BC3C3AD3BB454AAB057", Hasher.hexify(hashes.get(0)));
+                assertEquals("A8E6A6C5E35158CC1A73FA82B9A96A821208BBDF", Hasher.hexify(hashes.get(1)));
+                assertEquals("AB56AF573A74D2575318E6806543FCEC1DF80A43", Hasher.hexify(hashes.get(2)));
+                break;
+            case 3:
+                assertEquals(5, hashes.size());
+                assertEquals("D5A765D5418C2BC12FC10F9E18EBAD98AB9AB75D", Hasher.hexify(hashes.get(0)));
+                assertEquals("E78DD78994A9FA2D864DB731297D48F1DA5E5DF0", Hasher.hexify(hashes.get(1)));
+                assertEquals("FDD823A0D2D11856DFDD31AD838657F10D344D92", Hasher.hexify(hashes.get(2)));
+                assertEquals("3EA415B4E46111C8E34197D23455EFF5BDD7F09F", Hasher.hexify(hashes.get(3)));
+                assertEquals("AB56AF573A74D2575318E6806543FCEC1DF80A43", Hasher.hexify(hashes.get(4)));
+
+                childrenHashes = tree.getChildrenHashesOfHash(iter, hashes.get(0));
+                assertTrue(childrenHashes.isEmpty());
+
+                childrenHashes = tree.getChildrenHashesOfHash(iter, hashes.get(1));
+                assertTrue(childrenHashes.isEmpty());
+
+                childrenHashes = tree.getChildrenHashesOfHash(iter, hashes.get(2));
+                assertTrue(childrenHashes.isEmpty());
+
+                childrenHashes = tree.getChildrenHashesOfHash(iter, hashes.get(3));
+                assertTrue(childrenHashes.isEmpty());
+
+                childrenHashes = tree.getChildrenHashesOfHash(iter, hashes.get(4));
+                assertTrue(childrenHashes.isEmpty());
+
+                break;
+            }
+        }
+    }
 }

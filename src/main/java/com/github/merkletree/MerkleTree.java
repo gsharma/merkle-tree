@@ -2,6 +2,9 @@ package com.github.merkletree;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.RandomAccessFile;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -398,7 +401,7 @@ public final class MerkleTree {
     public static final class MerkleTreeByteArrayHashedSource implements MerkleTreeSource<byte[]> {
         private final List<byte[]> hashes;
 
-        public MerkleTreeByteArrayHashedSource(List<byte[]> hashes) {
+        public MerkleTreeByteArrayHashedSource(final List<byte[]> hashes) {
             this.hashes = Collections.unmodifiableList(hashes);
         }
 
@@ -426,6 +429,95 @@ public final class MerkleTree {
         public boolean alreadyHashed() {
             return true;
         }
+    }
+
+    /**
+     * This class acts as a source of leaf hashes emanating from splitting a
+     * file into many small file chunks.
+     */
+    public static final class MerkleTreeFileHashedSource implements MerkleTreeSource<byte[]> {
+        private final List<byte[]> hashes;
+
+        // Sip from the file fileSplitBytes-sized chunk at a time, don't just
+        // pull the entire file in memory, then hash the bytes, discard the
+        // bytes, save the hash, rinse, repeat.
+        //
+        // We can also do it lazily via pushing this logic down into the
+        // stream() method but the challenge is that the caller needs to be nice
+        // about closing the underlying file by reading it till the very end or
+        // by somehow letting us know that it's finished. This is likely to be
+        // fraught with danger.
+        public MerkleTreeFileHashedSource(final String fileName, int fileSplitBytes, final HashingScheme scheme)
+                throws IOException {
+            hashes = new ArrayList<byte[]>();
+            FileChannel channel = null;
+            RandomAccessFile file = null;
+            try {
+                file = new RandomAccessFile(fileName, "r");
+                channel = file.getChannel();
+                long fileSize = channel.size();
+                if (fileSize <= fileSplitBytes) {
+                    long originalFileSplitBytes = fileSplitBytes;
+                    fileSplitBytes /= 4;
+                    logger.info(String.format(
+                            "Input file:%s, (size:%d <= fileSplitBytes:%d), switching fileSplitBytes to:%d", fileName,
+                            fileSize, originalFileSplitBytes, fileSplitBytes));
+                }
+                final ByteBuffer buffer = ByteBuffer.allocate(fileSplitBytes);
+                while (-1 != (channel.read(buffer))) {
+                    final byte[] fileChunk = buffer.array();
+                    if (fileChunk != null) {
+                        final byte[] hash = Hasher.hash(scheme, fileChunk);
+                        hashes.add(hash);
+                    }
+                    buffer.clear();
+                }
+            } finally {
+                if (channel != null) {
+                    channel.close();
+                }
+                if (file != null) {
+                    file.close();
+                }
+            }
+        }
+
+        @Override
+        public Iterator<byte[]> stream() {
+            return hashes.iterator();
+        }
+
+        @Override
+        public SourceType getType() {
+            return SourceType.BYTE_ARRAY;
+        }
+
+        @Override
+        public boolean alreadyHashed() {
+            return true;
+        }
+
+        /**
+         * This encapsulates a chunk of a file.
+         */
+        public static final class FileChunk {
+            private final long startOffset;
+            private final long endOffset;
+
+            public FileChunk(final long startOffset, final long endOffset) {
+                this.startOffset = startOffset;
+                this.endOffset = endOffset;
+            }
+
+            public long getStartOffset() {
+                return startOffset;
+            }
+
+            public long getEndOffset() {
+                return endOffset;
+            }
+        }
+
     }
 
     /**

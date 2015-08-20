@@ -306,6 +306,8 @@ public final class MerkleTree {
         // leaves
         Collections.reverse(nodesByLevel);
 
+        logger.info(String.format("Curated MerkleTree with %d nodes and %d depth", nodeCount, treeDepth));
+
         return root;
     }
 
@@ -463,6 +465,8 @@ public final class MerkleTree {
                             "Input file:%s, (size:%d <= fileSplitBytes:%d), switching fileSplitBytes to:%d", fileName,
                             fileSize, originalFileSplitBytes, fileSplitBytes));
                 }
+                logger.info(String.format("Reading in chunks of %d of %d bytes of file %s for hashing", fileSplitBytes,
+                        fileSize, fileName));
                 final ByteBuffer buffer = ByteBuffer.allocate(fileSplitBytes);
                 while (-1 != (channel.read(buffer))) {
                     final byte[] fileChunk = buffer.array();
@@ -472,6 +476,8 @@ public final class MerkleTree {
                     }
                     buffer.clear();
                 }
+                logger.info(String.format("Prepared %d hashes for file %s using %s algorithm", hashes.size(), fileName,
+                        scheme));
             } finally {
                 if (channel != null) {
                     channel.close();

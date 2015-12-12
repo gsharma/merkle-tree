@@ -3,6 +3,7 @@ package com.github.merkletree;
 import static org.junit.Assert.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.codec.digest.DigestUtils;
@@ -277,4 +278,37 @@ public class MerkleTreeTest {
       }
     }
   }
+
+  @Test
+  public void testNodeLookup() {
+    final List<byte[]> sourceHashes = new ArrayList<byte[]>(4);
+    sourceHashes.add(DigestUtils.sha1("first hash"));
+    sourceHashes.add(DigestUtils.sha1("second hash"));
+    sourceHashes.add(DigestUtils.sha1("third hash"));
+    sourceHashes.add(DigestUtils.sha1("fourth hash"));
+    MerkleTreeSource source = new MerkleTreeByteArrayHashedSource(sourceHashes);
+
+    MerkleTree tree = new MerkleTree(HashingScheme.SHA1, BranchingFactor.TWO, source);
+    tree.printTree();
+
+    MerkleTreeNode root = tree.getRoot();
+    assertEquals("2D0FAF0A67399EE4140D39AC6C734297220F90B3", Hasher.hexify(root.getHash()));
+    assertEquals(7, tree.getNodeCount());
+    assertEquals(3, tree.getDepth());
+
+    for (byte[] sourceHash : sourceHashes) {
+      MerkleTreeNode node = tree.findNodeByHash(sourceHash);
+      assertNotNull(node);
+      assertTrue(Arrays.equals(sourceHash, node.getHash()));
+    }
+
+    int allNodes = 0;
+    for (List<MerkleTreeNode> leveledNodes : tree.getAllNodes()) {
+      for (MerkleTreeNode node : leveledNodes) {
+        allNodes++;
+      }
+    }
+    assertEquals(tree.getNodeCount(), allNodes);
+  }
+
 }

@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
  * @author gaurav
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
-public final class MerkleTree {
+public final class MerkleTree implements MerkleTreeInterface {
   private static final Logger logger = LoggerFactory.getLogger(MerkleTree.class.getSimpleName());
 
   // immutables pushed in during construction
@@ -79,31 +79,96 @@ public final class MerkleTree {
   }
 
   // Get the root node of this tree
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.github.merkletree.MerkleTreeInterface#getRoot()
+   */
+  @Override
   public MerkleTreeNode getRoot() {
     return root;
   }
 
   // Report the tree's hashing scheme
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.github.merkletree.MerkleTreeInterface#getHashingScheme()
+   */
+  @Override
   public HashingScheme getHashingScheme() {
     return hashingScheme;
   }
 
   // Report the tree's branching factor
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.github.merkletree.MerkleTreeInterface#getBranchingFactor()
+   */
+  @Override
   public BranchingFactor getBranchingFactor() {
     return branchingFactor;
   }
 
   // Get total count of nodes in the tree
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.github.merkletree.MerkleTreeInterface#getNodeCount()
+   */
+  @Override
   public int getNodeCount() {
     return nodeCount;
   }
 
   // Report depth of the tree
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.github.merkletree.MerkleTreeInterface#getDepth()
+   */
+  @Override
   public int getDepth() {
     return treeDepth;
   }
 
+  // Get all nodes level-ordered starting at root.
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.github.merkletree.MerkleTreeInterface#getAllNodes()
+   */
+  @Override
+  public List<List<MerkleTreeNode>> getAllNodes() {
+    List<List<MerkleTreeNode>> allNodes = null;
+    if (treeDepth > 0) {
+      allNodes = new ArrayList<List<MerkleTreeNode>>(treeDepth);
+      for (int level = 0; level < treeDepth; level++) {
+        allNodes.add(getNodesAtLevel(level));
+      }
+    }
+    return allNodes;
+  }
+
+  // Get all nodes at a given level within the tree
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.github.merkletree.MerkleTreeInterface#getNodesAtLevel(int)
+   */
+  @Override
+  public List<MerkleTreeNode> getNodesAtLevel(int level) {
+    return Collections.unmodifiableList(nodesByLevel.get(level));
+  }
+
   // Get all hashes at a given level within the tree
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.github.merkletree.MerkleTreeInterface#getHashesAtLevel(int)
+   */
+  @Override
   public List<byte[]> getHashesAtLevel(int level) {
     final List<byte[]> hashesAtLevel = new ArrayList<byte[]>();
     if (nodesByLevel != null && !nodesByLevel.isEmpty()) {
@@ -117,10 +182,48 @@ public final class MerkleTree {
     return hashesAtLevel;
   }
 
+  // Given a hash, find the matching node.
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.github.merkletree.MerkleTreeInterface#findNodeByHash(byte[])
+   */
+  @Override
+  public MerkleTreeNode findNodeByHash(final byte[] hash) {
+    MerkleTreeNode node = null;
+    if (hash != null && hash.length != 0) {
+      final LinkedList<MerkleTreeNode> queue = new LinkedList<MerkleTreeNode>();
+      if (root != null) {
+        queue.offerLast(root);
+      }
+      while (!queue.isEmpty()) {
+        final MerkleTreeNode current = queue.pollFirst();
+        if (current != null && Arrays.equals(hash, current.getHash())) {
+          node = current;
+          break;
+        } else {
+          final List<MerkleTreeNode> children = current.getChildren();
+          if (children != null && !children.isEmpty()) {
+            for (MerkleTreeNode child : children) {
+              queue.offerLast(child);
+            }
+          }
+        }
+      }
+    }
+    return node;
+  }
+
   // Compare hashes between two trees at the given level and return all hashes
   // that do not match. This function returns hashes that did not match in the
   // current tree and will not echo the passed in otherHashesToCompareWith
   // hashes.
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.github.merkletree.MerkleTreeInterface#compareHashesAtLevel(int, java.util.List)
+   */
+  @Override
   public List<byte[]> compareHashesAtLevel(int level, final List<byte[]> otherHashesToCompareWith) {
     final List<byte[]> diffs = new ArrayList<byte[]>();
     if (otherHashesToCompareWith != null && !otherHashesToCompareWith.isEmpty()) {
@@ -142,6 +245,12 @@ public final class MerkleTree {
   }
 
   // Get all children of the tree node that stores the passed in hash.
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.github.merkletree.MerkleTreeInterface#getChildrenHashesOfHash(int, byte[])
+   */
+  @Override
   public List<byte[]> getChildrenHashesOfHash(int level, final byte[] hash) {
     final List<byte[]> hashesAtLevel = new ArrayList<byte[]>();
     if (nodesByLevel != null && !nodesByLevel.isEmpty()) {
@@ -165,6 +274,12 @@ public final class MerkleTree {
 
   // Print tree level-ordered. Note that it does not currently pretty print
   // the tree.
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.github.merkletree.MerkleTreeInterface#printTree()
+   */
+  @Override
   public String printTree() {
     final StringBuilder builder = new StringBuilder("Printing Merkle Tree...\n");
     final LinkedList<MerkleTreeNode> queue = new LinkedList<MerkleTreeNode>();

@@ -44,7 +44,8 @@ import org.slf4j.LoggerFactory;
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public final class MerkleTreeImpl implements MerkleTree {
-  private static final Logger logger = LoggerFactory.getLogger(MerkleTreeImpl.class.getSimpleName());
+  private static final Logger logger = LoggerFactory
+      .getLogger(MerkleTreeImpl.class.getSimpleName());
 
   // immutables pushed in during construction
   private final HashingScheme hashingScheme;
@@ -79,66 +80,36 @@ public final class MerkleTreeImpl implements MerkleTree {
   }
 
   // Get the root node of this tree
-  /*
-   * (non-Javadoc)
-   * 
-   * @see com.github.merkletree.MerkleTreeInterface#getRoot()
-   */
   @Override
   public MerkleTreeNode getRoot() {
     return root;
   }
 
   // Report the tree's hashing scheme
-  /*
-   * (non-Javadoc)
-   * 
-   * @see com.github.merkletree.MerkleTreeInterface#getHashingScheme()
-   */
   @Override
   public HashingScheme getHashingScheme() {
     return hashingScheme;
   }
 
   // Report the tree's branching factor
-  /*
-   * (non-Javadoc)
-   * 
-   * @see com.github.merkletree.MerkleTreeInterface#getBranchingFactor()
-   */
   @Override
   public BranchingFactor getBranchingFactor() {
     return branchingFactor;
   }
 
   // Get total count of nodes in the tree
-  /*
-   * (non-Javadoc)
-   * 
-   * @see com.github.merkletree.MerkleTreeInterface#getNodeCount()
-   */
   @Override
   public int getNodeCount() {
     return nodeCount;
   }
 
   // Report depth of the tree
-  /*
-   * (non-Javadoc)
-   * 
-   * @see com.github.merkletree.MerkleTreeInterface#getDepth()
-   */
   @Override
   public int getDepth() {
     return treeDepth;
   }
 
   // Get all nodes level-ordered starting at root.
-  /*
-   * (non-Javadoc)
-   * 
-   * @see com.github.merkletree.MerkleTreeInterface#getAllNodes()
-   */
   @Override
   public List<List<MerkleTreeNode>> getAllNodes() {
     List<List<MerkleTreeNode>> allNodes = null;
@@ -152,22 +123,13 @@ public final class MerkleTreeImpl implements MerkleTree {
   }
 
   // Get all nodes at a given level within the tree
-  /*
-   * (non-Javadoc)
-   * 
-   * @see com.github.merkletree.MerkleTreeInterface#getNodesAtLevel(int)
-   */
   @Override
   public List<MerkleTreeNode> getNodesAtLevel(int level) {
-    return Collections.unmodifiableList(nodesByLevel.get(level));
+    List<MerkleTreeNode> nodesAtLevel = nodesByLevel.get(level);
+    return nodesAtLevel != null ? Collections.unmodifiableList(nodesAtLevel) : null;
   }
 
   // Get all hashes at a given level within the tree
-  /*
-   * (non-Javadoc)
-   * 
-   * @see com.github.merkletree.MerkleTreeInterface#getHashesAtLevel(int)
-   */
   @Override
   public List<byte[]> getHashesAtLevel(int level) {
     final List<byte[]> hashesAtLevel = new ArrayList<byte[]>();
@@ -183,11 +145,6 @@ public final class MerkleTreeImpl implements MerkleTree {
   }
 
   // Given a hash, find the matching node.
-  /*
-   * (non-Javadoc)
-   * 
-   * @see com.github.merkletree.MerkleTreeInterface#findNodeByHash(byte[])
-   */
   @Override
   public MerkleTreeNode findNodeByHash(final byte[] hash) {
     MerkleTreeNode node = null;
@@ -214,23 +171,16 @@ public final class MerkleTreeImpl implements MerkleTree {
     return node;
   }
 
-  // Compare hashes between two trees at the given level and return all hashes
-  // that do not match. This function returns hashes that did not match in the
-  // current tree and will not echo the passed in otherHashesToCompareWith
-  // hashes.
-  /*
-   * (non-Javadoc)
-   * 
-   * @see com.github.merkletree.MerkleTreeInterface#compareHashesAtLevel(int, java.util.List)
-   */
+  // Compare hashes between two trees at the given level and return all hashes that do not match.
+  // This function returns hashes that did not match in the current tree and will not echo the
+  // passed in otherHashesToCompareWith hashes.
   @Override
   public List<byte[]> compareHashesAtLevel(int level, final List<byte[]> otherHashesToCompareWith) {
     final List<byte[]> diffs = new ArrayList<byte[]>();
     if (otherHashesToCompareWith != null && !otherHashesToCompareWith.isEmpty()) {
       final List<byte[]> currentTreeHashes = getHashesAtLevel(level);
       for (int iter = 0; iter < currentTreeHashes.size(); iter++) {
-        // reached tail of otherHashesToCompareWith, append remaining
-        // entries in currentTreeHashes
+        // reached tail of otherHashesToCompareWith, append remaining entries in currentTreeHashes
         if (iter == otherHashesToCompareWith.size()) {
           while (iter < currentTreeHashes.size()) {
             diffs.add(currentTreeHashes.get(iter++));
@@ -245,11 +195,6 @@ public final class MerkleTreeImpl implements MerkleTree {
   }
 
   // Get all children of the tree node that stores the passed in hash.
-  /*
-   * (non-Javadoc)
-   * 
-   * @see com.github.merkletree.MerkleTreeInterface#getChildrenHashesOfHash(int, byte[])
-   */
   @Override
   public List<byte[]> getChildrenHashesOfHash(int level, final byte[] hash) {
     final List<byte[]> hashesAtLevel = new ArrayList<byte[]>();
@@ -272,13 +217,7 @@ public final class MerkleTreeImpl implements MerkleTree {
     return hashesAtLevel;
   }
 
-  // Print tree level-ordered. Note that it does not currently pretty print
-  // the tree.
-  /*
-   * (non-Javadoc)
-   * 
-   * @see com.github.merkletree.MerkleTreeInterface#printTree()
-   */
+  // Print tree level-ordered. Note that it does not currently pretty print the tree.
   @Override
   public String printTree() {
     final StringBuilder builder = new StringBuilder("Printing Merkle Tree...\n");
@@ -376,7 +315,7 @@ public final class MerkleTreeImpl implements MerkleTree {
 
     @Override
     public List<MerkleTreeNode> getChildren() {
-      return children;
+      return children != null ? Collections.unmodifiableList(children) : null;
     }
 
     @Override
@@ -396,7 +335,7 @@ public final class MerkleTreeImpl implements MerkleTree {
 
   // TODO
   public static class MerkleTreeSerDe {
-    public static void serialize(final MerkleTreeImpl tree) {}
+    public static void serialize(final MerkleTree tree) {}
 
     public static void deserialize() {}
   }
@@ -411,8 +350,7 @@ public final class MerkleTreeImpl implements MerkleTree {
     // build non-leaf nodes
     MerkleTreeNode root = curateNonLeaves(hashingScheme, leaves);
 
-    // flip nodes by level lists since we started creating the tree from its
-    // leaves
+    // flip nodes by level lists since we started creating the tree from its leaves
     Collections.reverse(nodesByLevel);
 
     logger.info(String.format("Curated Merkle Tree with %d nodes, %d levels deep, %s root hash",
@@ -445,8 +383,11 @@ public final class MerkleTreeImpl implements MerkleTree {
       default:
         throw new IllegalArgumentException(source.getType() + " is not yet supported");
     }
-    nodesByLevel.add(leaves);
-    return Collections.unmodifiableList(leaves);
+    if (leaves != null) {
+      nodesByLevel.add(leaves);
+      leaves = Collections.unmodifiableList(leaves);
+    }
+    return leaves;
   }
 
   /**
@@ -550,14 +491,12 @@ public final class MerkleTreeImpl implements MerkleTree {
   public static final class MerkleTreeFileHashedSource implements MerkleTreeSource<byte[]> {
     private final List<byte[]> hashes;
 
-    // Sip from the file fileSplitBytes-sized chunk at a time, don't just
-    // pull the entire file in memory, then hash the bytes, discard the
-    // bytes, save the hash, rinse, repeat.
+    // Sip from the file fileSplitBytes-sized chunk at a time, don't just pull the entire file in
+    // memory, then hash the bytes, discard the bytes, save the hash, rinse, repeat.
     //
-    // We can also do it lazily via pushing this logic down into the
-    // stream() method but the challenge is that the caller needs to be nice
-    // about closing the underlying file by reading it till the very end or
-    // by somehow letting us know that it's finished. This is likely to be
+    // We can also do it lazily via pushing this logic down into the stream() method but the
+    // challenge is that the caller needs to be nice about closing the underlying file by reading it
+    // till the very end or by somehow letting us know that it's finished. This is likely to be
     // fraught with danger.
     public MerkleTreeFileHashedSource(final String fileName, int fileSplitBytes,
         final HashingScheme scheme) throws IOException {
@@ -576,8 +515,7 @@ public final class MerkleTreeImpl implements MerkleTree {
               fileName, fileSize, originalFileSplitBytes, fileSplitBytes));
         }
         // logger.info(String.format("Reading in chunks of %d of %d bytes of file %s for hashing",
-        // fileSplitBytes,
-        // fileSize, fileName));
+        // fileSplitBytes, fileSize, fileName));
         final ByteBuffer buffer = ByteBuffer.allocate(fileSplitBytes);
         while (-1 != (channel.read(buffer))) {
           final byte[] fileChunk = buffer.array();
@@ -683,8 +621,7 @@ public final class MerkleTreeImpl implements MerkleTree {
       return new String(hex);
     }
 
-    // Hashes together node hashes by concatenating them and re-hashing the
-    // concatenated hashes
+    // Hashes together node hashes by concatenating them and re-hashing the concatenated hashes
     public static byte[] computeHash(final HashingScheme hashingScheme,
         final List<MerkleTreeNode> children) {
       byte[] superHash = null;

@@ -221,6 +221,11 @@ public final class MerkleTreeImpl implements MerkleTree {
   @Override
   public String printTree() {
     final StringBuilder builder = new StringBuilder("Printing Merkle Tree...\n");
+    builder.append("source:").append(source.getDescription());
+    builder.append(", hashingScheme:").append(getHashingScheme());
+    builder.append(", branchingFactor:").append(getBranchingFactor());
+    builder.append(", treeDepth:").append(getDepth());
+    builder.append(", nodeCount:").append(getNodeCount()).append("\n");
     final LinkedList<MerkleTreeNode> queue = new LinkedList<MerkleTreeNode>();
     if (root != null) {
       queue.offerLast(root);
@@ -321,11 +326,13 @@ public final class MerkleTreeImpl implements MerkleTree {
     @Override
     public String printNode() {
       StringBuilder builder = new StringBuilder();
-      builder.append("current:{").append(Hasher.hexify(hash)).append("} ");
+      builder.append("current:{").append(Hasher.hexify(hash)).append('[').append(getType())
+          .append(']').append("} ");
       builder.append("children:{ ");
       if (children != null) {
         for (MerkleTreeNode child : children) {
-          builder.append(Hasher.hexify(child.getHash())).append(' ');
+          builder.append(Hasher.hexify(child.getHash())).append('[').append(child.getType())
+              .append(']').append(' ');
         }
       }
       builder.append('}');
@@ -335,7 +342,20 @@ public final class MerkleTreeImpl implements MerkleTree {
 
   // TODO
   public static class MerkleTreeSerDe {
-    public static void serialize(final MerkleTree tree) {}
+
+    public static void serialize(final MerkleTreeNode node) {}
+
+    // call this with the root of the tree and let it walk the tree
+    // it is recursive and inefficient
+    /*
+     * public static String serialize(final MerkleTreeNode node) { StringBuilder serialized = new
+     * StringBuilder(); if (node != null) {
+     * serialized.append('.').append(node.getType().getType()).append(':');
+     * serialized.append(Hasher.hexify(node.getHash())).append('.'); if (node.getChildren() != null
+     * && !node.getChildren().isEmpty()) { List<MerkleTreeNode> children = node.getChildren(); for
+     * (MerkleTreeNode child : children) { serialized.append(serialize(child)); }
+     * serialized.append(')'); } } return serialized.toString(); }
+     */
 
     public static void deserialize() {}
   }
@@ -447,6 +467,8 @@ public final class MerkleTreeImpl implements MerkleTree {
 
     // Report if the data is already hashed or needs further hashing
     boolean alreadyHashed();
+
+    String getDescription();
   }
 
   /**
@@ -481,6 +503,12 @@ public final class MerkleTreeImpl implements MerkleTree {
     @Override
     public boolean alreadyHashed() {
       return true;
+    }
+
+    @Override
+    public String getDescription() {
+      return getClass().getSimpleName() + ", type:" + getType().name() + ", hashed:"
+          + alreadyHashed();
     }
   }
 
@@ -551,6 +579,12 @@ public final class MerkleTreeImpl implements MerkleTree {
     @Override
     public boolean alreadyHashed() {
       return true;
+    }
+
+    @Override
+    public String getDescription() {
+      return getClass().getSimpleName() + ", type:" + getType().name() + ", hashed:"
+          + alreadyHashed();
     }
 
     /**

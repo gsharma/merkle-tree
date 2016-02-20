@@ -7,7 +7,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.log4j.BasicConfigurator;
 import org.junit.Test;
 
 import com.github.merkletree.MerkleTreeImpl.BranchingFactor;
@@ -21,7 +20,9 @@ import com.github.merkletree.MerkleTreeImpl.MerkleTreeSource;
 @SuppressWarnings("rawtypes")
 public class MerkleTreeTest {
   {
-    BasicConfigurator.configure();
+    System.setProperty("log4j.configurationFile", "log4j.properties");
+    System.setProperty("Log4jContextSelector",
+        "org.apache.logging.log4j.core.async.AsyncLoggerContextSelector");
   }
 
   @Test

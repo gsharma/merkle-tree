@@ -13,8 +13,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.codec.digest.DigestUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 // import com.google.common.collect.AbstractIterator;
 
@@ -44,8 +44,7 @@ import org.slf4j.LoggerFactory;
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public final class MerkleTreeImpl implements MerkleTree {
-  private static final Logger logger = LoggerFactory
-      .getLogger(MerkleTreeImpl.class.getSimpleName());
+  private static final Logger logger = LogManager.getLogger(MerkleTreeImpl.class.getSimpleName());
 
   // immutables pushed in during construction
   private final HashingScheme hashingScheme;
@@ -393,7 +392,7 @@ public final class MerkleTreeImpl implements MerkleTree {
           MerkleTreeNode<byte[]> leaf = new MerkleTreeByteArrayNode(hash);
           leaf.bloomNode(hashingScheme, source.alreadyHashed());
           leaves.add(leaf);
-          // logger.info(leaf.printNode());
+          logger.info(leaf.printNode());
           nodeCount++;
         }
         if (nodeCount > 0) {
@@ -434,14 +433,14 @@ public final class MerkleTreeImpl implements MerkleTree {
           final MerkleTreeNode hashCandidate = new MerkleTreeByteArrayNode(toHash);
           hashCandidate.bloomNode(hashingScheme, source.alreadyHashed());
           parentLevelNodes.add(hashCandidate);
-          // logger.info(hashCandidate.printNode());
+          logger.info(hashCandidate.printNode());
           nodeCount++;
         }
         if (!parentLevelNodes.isEmpty()) {
           nodesByLevel.add(parentLevelNodes);
           treeDepth++;
         }
-        // logger.info("parentNodeCount:" + parentLevelNodes.size());
+        logger.info("parentNodeCount:" + parentLevelNodes.size());
         if (parentLevelNodes.size() > 1) {
           rootNode = curateNonLeaves(hashingScheme, parentLevelNodes);
         }
@@ -542,8 +541,8 @@ public final class MerkleTreeImpl implements MerkleTree {
               "Input file:%s, (size:%d <= fileSplitBytes:%d), switching fileSplitBytes to:%d",
               fileName, fileSize, originalFileSplitBytes, fileSplitBytes));
         }
-        // logger.info(String.format("Reading in chunks of %d of %d bytes of file %s for hashing",
-        // fileSplitBytes, fileSize, fileName));
+        logger.info(String.format("Reading in chunks of %d of %d bytes of file %s for hashing",
+            fileSplitBytes, fileSize, fileName));
         final ByteBuffer buffer = ByteBuffer.allocate(fileSplitBytes);
         while (-1 != (channel.read(buffer))) {
           final byte[] fileChunk = buffer.array();
@@ -622,7 +621,7 @@ public final class MerkleTreeImpl implements MerkleTree {
       switch (scheme) {
         case SHA1:
           sha1 = DigestUtils.sha1(bytes);
-          // logger.info(hexify(sha1));
+          logger.info(hexify(sha1));
           break;
         default:
           throw new IllegalArgumentException(scheme + " is not yet supported");

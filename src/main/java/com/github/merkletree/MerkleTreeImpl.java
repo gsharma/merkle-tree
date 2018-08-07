@@ -43,7 +43,7 @@ import org.apache.logging.log4j.LogManager;
  * @author gaurav
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
-public final class MerkleTreeImpl implements MerkleTree {
+final class MerkleTreeImpl implements MerkleTree {
   private static final Logger logger = LogManager.getLogger(MerkleTreeImpl.class.getSimpleName());
 
   // immutables pushed in during construction
@@ -57,7 +57,7 @@ public final class MerkleTreeImpl implements MerkleTree {
   private int treeDepth;
   private final List<List<MerkleTreeNode>> nodesByLevel;
 
-  public MerkleTreeImpl(final HashingScheme hashingScheme, final BranchingFactor branchingFactor,
+  MerkleTreeImpl(final HashingScheme hashingScheme, final BranchingFactor branchingFactor,
       final MerkleTreeSource source) {
     if (hashingScheme == null) {
       throw new IllegalArgumentException("HashingScheme cannot be null");
@@ -552,9 +552,9 @@ public final class MerkleTreeImpl implements MerkleTree {
           }
           buffer.clear();
         }
-        logger.info(String.format(
-            "Prepared %d hashes from %d byte chunks from file %s using %s algorithm ",
-            hashes.size(), fileSplitBytes, fileName, scheme));
+        logger.info(
+            String.format("Prepared %d hashes from %d byte chunks from file %s using %s algorithm ",
+                hashes.size(), fileSplitBytes, fileName, scheme));
       } finally {
         if (channel != null) {
           channel.close();

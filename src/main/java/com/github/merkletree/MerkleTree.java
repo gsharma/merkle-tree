@@ -1,10 +1,12 @@
 package com.github.merkletree;
 
+import java.util.LinkedList;
 import java.util.List;
 
 import com.github.merkletree.MerkleTreeImpl.BranchingFactor;
 import com.github.merkletree.MerkleTreeImpl.HashingScheme;
 import com.github.merkletree.MerkleTreeImpl.MerkleTreeNode;
+import com.github.merkletree.MerkleTreeImpl.MerkleTreeSource;
 
 @SuppressWarnings("rawtypes")
 public interface MerkleTree {
@@ -46,5 +48,39 @@ public interface MerkleTree {
 
   // Get all children of the tree node that stores the passed in hash.
   public List<byte[]> getChildrenHashesOfHash(int level, byte[] hash);
+
+  /**
+   * A simple builder to let users use fluent APIs to build MerkleTree.
+   */
+  public final static class MerkleTreeBuilder {
+    private HashingScheme hashingScheme;
+    private BranchingFactor branchingFactor;
+    private MerkleTreeSource source;
+
+    public static MerkleTreeBuilder newBuilder() {
+      return new MerkleTreeBuilder();
+    }
+
+    public MerkleTreeBuilder hashingScheme(final HashingScheme hashingScheme) {
+      this.hashingScheme = hashingScheme;
+      return this;
+    }
+
+    public MerkleTreeBuilder branchingFactor(final BranchingFactor branchingFactor) {
+      this.branchingFactor = branchingFactor;
+      return this;
+    }
+
+    public MerkleTreeBuilder source(final MerkleTreeSource source) {
+      this.source = source;
+      return this;
+    }
+
+    public MerkleTree build() {
+      return new MerkleTreeImpl(hashingScheme, branchingFactor, source);
+    }
+
+    private MerkleTreeBuilder() {}
+  }
 
 }

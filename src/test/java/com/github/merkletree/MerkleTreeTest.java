@@ -9,6 +9,7 @@ import java.util.List;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.junit.Test;
 
+import com.github.merkletree.MerkleTree.MerkleTreeBuilder;
 import com.github.merkletree.MerkleTreeImpl.BranchingFactor;
 import com.github.merkletree.MerkleTreeImpl.Hasher;
 import com.github.merkletree.MerkleTreeImpl.HashingScheme;
@@ -33,7 +34,8 @@ public class MerkleTreeTest {
     sourceHashes.add(DigestUtils.sha1("third hash"));
     sourceHashes.add(DigestUtils.sha1("fourth hash"));
     MerkleTreeSource source = new MerkleTreeByteArrayHashedSource(sourceHashes);
-    MerkleTree tree = new MerkleTreeImpl(HashingScheme.SHA1, BranchingFactor.TWO, source);
+    MerkleTree tree = MerkleTreeBuilder.newBuilder().hashingScheme(HashingScheme.SHA1)
+        .branchingFactor(BranchingFactor.TWO).source(source).build();
     tree.printTree();
 
     MerkleTreeNode root = tree.getRoot();
@@ -103,10 +105,12 @@ public class MerkleTreeTest {
     sourceHashes.add(DigestUtils.sha1("fourth hash"));
     MerkleTreeSource source = new MerkleTreeByteArrayHashedSource(sourceHashes);
 
-    MerkleTree tree1 = new MerkleTreeImpl(HashingScheme.SHA1, BranchingFactor.TWO, source);
+    MerkleTree tree1 = MerkleTreeBuilder.newBuilder().hashingScheme(HashingScheme.SHA1)
+        .branchingFactor(BranchingFactor.TWO).source(source).build();
     tree1.printTree();
 
-    MerkleTree tree2 = new MerkleTreeImpl(HashingScheme.SHA1, BranchingFactor.TWO, source);
+    MerkleTree tree2 = MerkleTreeBuilder.newBuilder().hashingScheme(HashingScheme.SHA1)
+        .branchingFactor(BranchingFactor.TWO).source(source).build();
     tree2.printTree();
 
     MerkleTreeNode root1 = tree1.getRoot();
@@ -139,7 +143,8 @@ public class MerkleTreeTest {
     sourceHashes1.add(DigestUtils.sha1("fourth hash"));
     MerkleTreeSource source1 = new MerkleTreeByteArrayHashedSource(sourceHashes1);
 
-    MerkleTree tree1 = new MerkleTreeImpl(HashingScheme.SHA1, BranchingFactor.TWO, source1);
+    MerkleTree tree1 = MerkleTreeBuilder.newBuilder().hashingScheme(HashingScheme.SHA1)
+        .branchingFactor(BranchingFactor.TWO).source(source1).build();
     tree1.printTree();
 
     final List<byte[]> sourceHashes2 = new ArrayList<byte[]>(4);
@@ -149,7 +154,8 @@ public class MerkleTreeTest {
     sourceHashes2.add(DigestUtils.sha1("fifth hash"));
     MerkleTreeSource source2 = new MerkleTreeByteArrayHashedSource(sourceHashes2);
 
-    MerkleTree tree2 = new MerkleTreeImpl(HashingScheme.SHA1, BranchingFactor.TWO, source2);
+    MerkleTree tree2 = MerkleTreeBuilder.newBuilder().hashingScheme(HashingScheme.SHA1)
+        .branchingFactor(BranchingFactor.TWO).source(source2).build();
     tree2.printTree();
 
     MerkleTreeNode root1 = tree1.getRoot();
@@ -211,7 +217,8 @@ public class MerkleTreeTest {
     final int fileSplitBytes = 2 * 1024 * 1024; // 2MB
     MerkleTreeSource source =
         new MerkleTreeFileHashedSource(fileName, fileSplitBytes, HashingScheme.SHA1);
-    MerkleTree tree = new MerkleTreeImpl(HashingScheme.SHA1, BranchingFactor.TWO, source);
+    MerkleTree tree = MerkleTreeBuilder.newBuilder().hashingScheme(HashingScheme.SHA1)
+        .branchingFactor(BranchingFactor.TWO).source(source).build();
     tree.printTree();
 
     MerkleTreeNode root = tree.getRoot();
@@ -289,7 +296,8 @@ public class MerkleTreeTest {
     sourceHashes.add(DigestUtils.sha1("fourth hash"));
     MerkleTreeSource source = new MerkleTreeByteArrayHashedSource(sourceHashes);
 
-    MerkleTree tree = new MerkleTreeImpl(HashingScheme.SHA1, BranchingFactor.TWO, source);
+    MerkleTree tree = MerkleTreeBuilder.newBuilder().hashingScheme(HashingScheme.SHA1)
+        .branchingFactor(BranchingFactor.TWO).source(source).build();
     tree.printTree();
 
     MerkleTreeNode root = tree.getRoot();

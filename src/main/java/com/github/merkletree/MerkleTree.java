@@ -1,6 +1,5 @@
 package com.github.merkletree;
 
-import java.util.LinkedList;
 import java.util.List;
 
 import com.github.merkletree.MerkleTreeImpl.BranchingFactor;

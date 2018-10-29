@@ -1,4 +1,4 @@
-[![Build Status](https://api.travis-ci.org/gsharma/merkletree.png)](https://travis-ci.org/gsharma/merkletree)
+[![Build Status](https://api.travis-ci.org/gsharma/merkle-tree.png)](https://travis-ci.org/gsharma/merkle-tree)
 
 # Merkle Tree
 

@@ -1,5 +1,6 @@
 [![Build Status](https://img.shields.io/travis/gsharma/merkle-tree/master.svg)](https://travis-ci.org/gsharma/merkle-tree)
 [![Test Coverage](https://img.shields.io/codecov/c/github/gsharma/merkle-tree/master.svg)](https://codecov.io/github/gsharma/merkle-tree?branch=master)
+[![Licence](https://img.shields.io/hexpm/l/plug.svg)](https://github.com/gsharma/merkle-tree/blob/master/LICENSE)
 
 # Merkle Tree
 

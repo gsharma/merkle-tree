@@ -20,11 +20,6 @@ import com.github.merkletree.MerkleTreeImpl.MerkleTreeSource;
 
 @SuppressWarnings("rawtypes")
 public class MerkleTreeTest {
-  {
-    System.setProperty("log4j.configurationFile", "log4j.properties");
-    System.setProperty("Log4jContextSelector",
-        "org.apache.logging.log4j.core.async.AsyncLoggerContextSelector");
-  }
 
   @Test
   public void testSha1TwoChildMerkleTree() {

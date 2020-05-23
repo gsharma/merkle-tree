@@ -148,3 +148,9 @@ Add mvn dependency:
 </dependency>
 ```
 
+## Contributing
+Requires Java 8 and Maven 3. To setup Eclipse and test locally:
+```xml
+mvn install -DdownloadSources eclipse:eclipse
+```
+Create issues and associated pull requests are welcome.

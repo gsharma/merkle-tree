@@ -13,7 +13,7 @@
     <github.user.name>gsharma</github.user.name>
     <github.repo.name>merkle-tree</github.repo.name>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <junit.version>4.12</junit.version>
+    <junit.version>4.13.1</junit.version>
     <log4j.version>2.11.1</log4j.version>
     <disruptor.version>3.4.2</disruptor.version>
     <commons-codec.version>1.11</commons-codec.version>
